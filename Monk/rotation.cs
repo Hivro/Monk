@@ -92,7 +92,7 @@ namespace Shaper
             //API.CreateMacro("Focus Effuse", "/cast [@focus] Effuse");
 
             // WW Rotation Start ------------------------------------------------------------------
-            if ((API.CanCast("Tiger Palm") && TargetIsEnemy && (!IgnoreTarget)) && (API.Spec() == "Monk: Windwalker"))
+            if ((API.CanCast("Tiger Palm") && API.TargetIsEnemy() && (!IgnoreTarget)) && (API.Spec() == "Monk: Windwalker"))
             {
                 //Basic Rotation ------------------------------------------------------------------
 
@@ -231,7 +231,7 @@ namespace Shaper
                 //Heal if not in combat
                 if (API.IsInCombat && HealthPercent <= 95 & Energy >= 30 )
                 {
-                    //WoW.SendMacro("/cast [@player] Effuse");
+                    //Macro("/cast [@player] Effuse");
                     return;
     
  */

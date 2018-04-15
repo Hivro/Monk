@@ -107,7 +107,7 @@ namespace Shaper
     }
 }
 
-/
+/*
                 //Blackout Kick (DONE)
                 if (API.CanCast("Blackout Kick") && Chi >= 1 && API.LastCastSuccess() != "Blackout Kick")
                 {

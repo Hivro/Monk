@@ -197,9 +197,9 @@ namespace Shaper
                 if ((API.CanCast("Tiger Palm")) && (!IgnoreTarget) && API.Spec() == "Monk: Brewmaster")
                 {
                     if (API.BuffRemaining("Eye of the Tiger") "player")) <= 400)
-                 {
+                    {
                         API.Cast("Tiger Palm")
-                    return;
+                        return;
                     }
                 }
             }

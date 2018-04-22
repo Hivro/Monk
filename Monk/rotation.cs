@@ -5,12 +5,17 @@ using System.Diagnostics;
 namespace Shaper
 {
     public class HWalker : Rotation
+        
     {
         public override void Initialize()
         {
             API.KeypressDelay = 333;
-            API.PrintLine("Welcome to HMonk v1.0.0 by Hivro");
-            API.PrintLine("Please let me know if you have any suggestions and I will work on them as best as I can, thank you!");
+            API.PrintLine(" ------------------------------------------------------------");
+            API.PrintLine(" ------------ Welcome to HMonk v1.0.0 by Hivro --------------");
+            API.PrintLine(" ----- Please let me know if you have any suggestions -------");
+            API.PrintLine(" --- and I will work on them as best as I can, thank you! ---");
+            API.PrintLine(" ------------------------------------------------------------");
+            API.PrintLine(" ------------ WW = 30% --- BrM = 20% --- MW = N/A -----------");
             PulseTimer.Start();
         }
 
@@ -28,10 +33,15 @@ namespace Shaper
             "Blind", "Polymorph", "Fear", "Psychic Scream", "Sap", "Hex", "Freezing Trap", "Cyclone", "Paralysis"
         };
 
+        //set a GCD timer
         public static int MaxGCD = 0;
-
+        
+        //Create a spell priority casting list and past list of casted spells
+        private static int Priority;
         public override void CombatPulse()
+
         {
+
             //initialize some commonly used variables at the beginning of each pulse to cut down on API calls
             bool IgnoreTarget = false;
             bool Moving = API.IsMoving();
@@ -60,6 +70,7 @@ namespace Shaper
             }
 
             //If target shouldnt be hit -- display message to tab if needed -----------------------
+
 
             //=====================================================================================
             //Windwalker
@@ -90,76 +101,95 @@ namespace Shaper
                 bool Serenity = (API.Talents(7) == 3);
 
                 //WW Macros -----------------------------------------------------------------------
-                //API.CreateMacro("Focus Effuse", "/cast [@focus] Effuse");
+                //API.CreateMacro("Self Effuse", "/cast [@player] Effuse");
+
+                
 
                 // WW Rotation Start --------------------------------------------------------------
                 if ((API.CanCast("Tiger Palm") && API.TargetIsEnemy() && (!IgnoreTarget)) && (API.Spec() == "Monk: Windwalker"))
                 {
+                    //Serenity Burst Logic --------------------------------------------------------
+                    /* if (API.HasBuff("Serenity"))
+                        {
+                            
+                        }
+                        */
                     //Basic Rotation --------------------------------------------------------------
-
-                    //Tiger Palm (DONE)
-                    if (API.CanCast("Tiger Palm", "target", true, true) && Energy >= 50 && API.LastCastSuccess() != "Tiger Palm")
+                    
+                    //Fists of Fury
+                    if (API.CanCast("Fists of Fury", "target") && (Chi >= 3) && (API.LastCastSuccess() != "Energizing Elixir"))
+                    {
+                        API.Cast("Fists of Fury");
+                        return;
+                    }
+                    
+                    //Strike Of The Windlord
+                    if (API.CanCast("Strike of the Windlord", "target") && Chi >= 2)
+                    {
+                        API.Cast("Strike of the Windlord");                            
+                        return;
+                    }
+                    
+                    //Tiger Palm (if <4 Chi and about to cap energy)
+                    if (API.CanCast("Tiger Palm", "target") && Energy >= 50 && (API.LastCastSuccess() != ("Energizing Elixir")) && Chi < 4 && (API.LastCastSuccess() != "Tiger Palm"))
                     {
                         API.Cast("Tiger Palm");
                         return;
                     }
 
-                    //Blackout Kick (DONE)
-                    if (API.CanCast("Blackout Kick") && Chi >= 1 && API.LastCastSuccess() != "Blackout Kick")
-                    {
-                        API.Cast("Blackout Kick");
-                        return;
-                    }
-
-                    //Rising Sun Kick (DONE)
-                    if (API.CanCast("Rising Sun Kick", "target") && Chi >= 2 && API.LastCastSuccess() != "Rising Sun Kick")
+                    //Rising Sun Kick
+                    if (API.CanCast("Rising Sun Kick", "target") && Chi >= 2)
                     {
                         API.Cast("Rising Sun Kick");
                         return;
                     }
 
-                    //Strike of the Windlord (DONE)
-                    if (API.CanCast("Strike of the Windlord", "target") && Chi >= 2 && API.LastCastSuccess() != "Strike of the Windlord")
-                    {
-                        API.Cast("Strike of the Windlord");
-                        return;
-                    }
-
-                    //Fists of Fury (DONE?)
-                    if (API.CanCast("Fists of Fury") && Chi >= 3 && API.LastCastSuccess() != "Fists of Fury")
-                    {
-                        API.Cast("Fists of Fury");
-                        return;
-                    }
-
-                    //Whirling Dragon Punch (DONE)
-                    if ((API.CanCast("Whirling Dragon Punch", "target")
-                        && API.SpellCooldown("Rising Sun Kick") < MaxGCD)
-                        && (API.SpellCooldown("Fists of Fury") < MaxGCD)
-                        && API.LastCastSuccess() != ("Whirling Dragon Punch")) ;
+                    //Whirling Dragon Punch
+                    if (API.CanCast("Whirling Dragon Punch", "target") && (API.SpellCooldown("Fists of Fury") < MaxGCD * .28) && (API.SpellCooldown("Rising Sun Kick") < MaxGCD * .28))
                     {
                         API.Cast("Whirling Dragon Punch");
                         return;
                     }
 
-                    //Chi Wave (DONE)
-                    if (API.CanCast("Chi Wave", "target") && Energy < 50 && Chi < 5 && API.LastCastSuccess() != "Chi Wave")
+                    //Chi Wave
+                    if (API.CanCast("Chi Wave", "target") && Energy < 50 && Chi < 5)
                     {
                         API.Cast("Chi Wave");
                         return;
                     }
-                 
-                    //WW AoE Rotation -------------------------------------------------------------
-                    if ((EnemiesInMeleeRange() > 1) && !IgnoreTarget && API.CanCast("Tiger Palm")) ;
-                    {
-                        if (API.CanCast("Spinning Crane Kick", "target") && Energy > 50) ;
 
+                    //Blackout Kick
+                    if (API.CanCast("Blackout Kick", "target") && (Chi > 1 || API.HasBuff("Blackout Kick!")) && (API.LastCastSuccess() != "Blackout Kick"))
+                    {
+                        API.Cast("Blackout Kick");
+                        return;
                     }
+
+                    //Tiger Palm
+                    if (API.CanCast("Tiger Palm", "target") && Energy >= 50 && (API.LastCastSuccess() != "Tiger Palm"))
+                    {
+                        API.Cast("Tiger Palm");
+                        return;
+                    }
+
+                    //CracklingJadeLightning (only to counter the Tiger Palm issue)
+                    if (API.CanCast("Crackling Jade Lightning", "target") && Energy >= 20 && (API.LastCastSuccess() != "Tiger Palm") && Chi == 0)
+                    {
+                        API.Cast("Crackling Jade Lightning");
+                        return;
+                    }
+                        
+                    //WW AoE Rotation -------------------------------------------------------------
+                    //if ((EnemiesInMeleeRange() > 1) && !IgnoreTarget && API.CanCast("Tiger Palm")) ;
+                    //{
+                    //    if (API.CanCast("Spinning Crane Kick", "target") && Energy > 50) ;
+
+                    //}
                 }
             }
 
 
-
+            
 
             //=====================================================================================
             //Brewmaster
@@ -191,20 +221,68 @@ namespace Shaper
                 bool HighTolerance = (API.Talents(7) == 3);
 
                 //BrM Macros ----------------------------------------------------------------------
-                //API.CreateMacro("Focus Effuse", "/cast [@focus] Effuse");
+                //API.CreateMacro("Self Effuse", "/cast [@player] Effuse");
 
-                //BrM Rotation Start
-                if ((API.CanCast("Tiger Palm")) && (!IgnoreTarget) && API.Spec() == "Monk: Brewmaster")
+                //if (!API.IsInCombat && TargetHealth <= 85 && Energy >= 50 && (API.CastingSpell("player") == 0))
+                //{
+                //    API.Cast("Self Effuse");
+                //    return;
+                //}
+
+                //BrM Basic Rotation --------------------------------------------------------------
+                //Managing Stagger ----------------------------------------------------------------
+                if (API.HasDebuff("Light Stagger"))
                 {
-                    if (API.BuffRemaining("Eye of the Tiger") "player")) <= 400)
+                    API.Cast("Purifying Brew");
+                    return;
+                }
+                if (API.HasDebuff("Moderate Stagger")) && 
+                {
+
+                    return;
+                }
+                if (API.HasDebuff("Heavy Stagger"))
+                {
+                    API.Cast("Purifying Brew");
+                    return;
+                }
+
+                if ((API.CanCast("Tiger Palm", "target")) && (!IgnoreTarget) && API.Spec() == "Monk: Brewmaster")
+                {
+                    if (API.CanCast("Rushing Jade Wind") && (API.BuffRemaining("Rushing Jade Wind") < 300))
                     {
-                        API.Cast("Tiger Palm")
+                        API.Cast("Rushing Jade Wind");
+                        return;
+                    }
+
+                    if ((API.CanCast("Keg Smash", "target")) && (Energy >= 40))
+                    {
+                            API.Cast("Keg Smash");
+                            return;
+                    }
+
+                    if (API.CanCast("Blackout Strike", "target"))
+                    {
+                            API.Cast("Blackout Strike");
+                            return;
+                    }
+
+                    if (API.CanCast("Breath of Fire", "target"))
+                    {
+                            API.Cast("Breath of Fire");
+                            return;
+                    }
+
+                    if ((API.CanCast("Tiger Palm", "target")) && (Energy >= 65) && (API.SpellCooldown("Breath of Fire") < MaxGCD * .28) && (API.SpellCooldown("Keg Smash") < MaxGCD * .28) && (API.SpellCooldown("Blackout Strike") < MaxGCD * .28))
+                    {
+                        API.Cast("Tiger Palm");
                         return;
                     }
                 }
             }
 
 
+            /*
             //=====================================================================================
             //Mistweaver
             //=====================================================================================
@@ -245,8 +323,7 @@ namespace Shaper
                         //Macro("/cast [@player] Effuse");
                         return;
                     }
-                }
-            }                 
-        }
+                } */              
+        }        
     }
 }
